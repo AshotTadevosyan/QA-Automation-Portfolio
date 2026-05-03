@@ -30,28 +30,33 @@ public class InventoryPage : BasePage
 
     public void AddProductToCartByIndex(int index = 0)
     {
-        var addButtons = Driver.FindElements(
-            By.CssSelector(".inventory_item button[id^='add-to-cart']"));
-        if (index >= addButtons.Count)
-            throw new ArgumentOutOfRangeException(nameof(index));
-        int countBefore = addButtons.Count;
-        addButtons[index].Click();
-        // Wait for the button to flip to "Remove", confirming the click registered.
-        Wait.Until(d => d.FindElements(
-            By.CssSelector(".inventory_item button[id^='add-to-cart']")).Count == countBefore - 1);
+        var buttons = Wait.Until(d =>
+        {
+            var b = d.FindElements(By.CssSelector(".inventory_item button[id^='add-to-cart']"));
+            return b.Count > index ? b : null;
+        })!;
+
+        // product slug: "add-to-cart-sauce-labs-backpack" → "sauce-labs-backpack"
+        string slug = buttons[index].GetAttribute("id").Replace("add-to-cart-", "");
+        ((OpenQA.Selenium.IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].click();", buttons[index]);
+
+        // Wait for the matching Remove button to appear (confirms the click fired).
+        Wait.Until(d => d.FindElements(By.Id($"remove-{slug}")).Count > 0);
     }
 
     public void RemoveProductFromCartByIndex(int index = 0)
     {
-        var removeButtons = Driver.FindElements(
-            By.CssSelector(".inventory_item button[id^='remove']"));
-        if (index >= removeButtons.Count)
-            throw new ArgumentOutOfRangeException(nameof(index));
-        int countBefore = removeButtons.Count;
-        removeButtons[index].Click();
-        // Wait for the button to flip back to "Add to cart".
-        Wait.Until(d => d.FindElements(
-            By.CssSelector(".inventory_item button[id^='remove']")).Count == countBefore - 1);
+        var buttons = Wait.Until(d =>
+        {
+            var b = d.FindElements(By.CssSelector(".inventory_item button[id^='remove']"));
+            return b.Count > index ? b : null;
+        })!;
+
+        string slug = buttons[index].GetAttribute("id").Replace("remove-", "");
+        ((OpenQA.Selenium.IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].click();", buttons[index]);
+
+        // Wait for the Add-to-cart button to re-appear, confirming removal fired.
+        Wait.Until(d => d.FindElements(By.Id($"add-to-cart-{slug}")).Count > 0);
     }
 
     public string GetProductNameByIndex(int index = 0) =>
