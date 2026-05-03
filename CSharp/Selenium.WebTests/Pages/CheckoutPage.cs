@@ -18,15 +18,13 @@ public class CheckoutPage : BasePage
         WaitForElement(FirstNameInput).SendKeys(firstName);
         WaitForElement(LastNameInput).SendKeys(lastName);
         WaitForElement(PostalCodeInput).SendKeys(postalCode);
-        WaitForClickable(ContinueButton).Click();
-        Wait.Until(d => d.Url.Contains("checkout-step-two"));
+        ClickUntil(ContinueButton, d => d.Url.Contains("checkout-step-two"));
         return this;
     }
 
     public CheckoutPage FinishOrder()
     {
-        WaitForClickable(FinishButton).Click();
-        Wait.Until(d => d.Url.Contains("checkout-complete"));
+        ClickUntil(FinishButton, d => d.Url.Contains("checkout-complete"));
         return this;
     }
 

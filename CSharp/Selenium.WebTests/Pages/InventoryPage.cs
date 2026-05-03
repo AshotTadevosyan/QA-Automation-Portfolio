@@ -37,9 +37,9 @@ public class InventoryPage : BasePage
         })!;
 
         string slug = buttons[index].GetAttribute("id").Replace("add-to-cart-", "");
-        buttons[index].Click();
-        // Wait for the matching Remove button to appear, confirming the click registered.
-        Wait.Until(d => d.FindElements(By.Id($"remove-{slug}")).Count > 0);
+        var addLocator = By.Id($"add-to-cart-{slug}");
+        var removeLocator = By.Id($"remove-{slug}");
+        ClickUntil(addLocator, d => d.FindElements(removeLocator).Count > 0);
     }
 
     public void RemoveProductFromCartByIndex(int index = 0)
@@ -51,9 +51,9 @@ public class InventoryPage : BasePage
         })!;
 
         string slug = buttons[index].GetAttribute("id").Replace("remove-", "");
-        buttons[index].Click();
-        // Wait for the Add-to-cart button to reappear, confirming removal fired.
-        Wait.Until(d => d.FindElements(By.Id($"add-to-cart-{slug}")).Count > 0);
+        var removeLocator = By.Id($"remove-{slug}");
+        var addLocator = By.Id($"add-to-cart-{slug}");
+        ClickUntil(removeLocator, d => d.FindElements(addLocator).Count > 0);
     }
 
     public string GetProductNameByIndex(int index = 0) =>
@@ -61,8 +61,7 @@ public class InventoryPage : BasePage
 
     public CartPage GoToCart()
     {
-        WaitForClickable(CartLink).Click();
-        Wait.Until(d => d.Url.Contains("cart"));
+        ClickUntil(CartLink, d => d.Url.Contains("cart"));
         return new CartPage(Driver);
     }
 
