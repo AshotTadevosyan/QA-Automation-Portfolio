@@ -21,12 +21,14 @@ public class CartPage : BasePage
     public CheckoutPage ProceedToCheckout()
     {
         WaitForElement(CheckoutButton).Click();
+        Wait.Until(d => d.Url.Contains("checkout"));
         return new CheckoutPage(Driver);
     }
 
     public InventoryPage ContinueShopping()
     {
         WaitForElement(ContinueButton).Click();
+        Wait.Until(d => d.Url.Contains("inventory"));
         return new InventoryPage(Driver);
     }
 }
