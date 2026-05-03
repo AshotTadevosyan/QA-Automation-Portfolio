@@ -18,11 +18,10 @@ public class LoginPage : BasePage
     {
         WaitForElement(UsernameInput).SendKeys(username);
         Driver.FindElement(PasswordInput).SendKeys(password);
-        Driver.FindElement(LoginButton).Click();
-        var inventory = new InventoryPage(Driver);
+        JsClick(LoginButton);
         // Block until the inventory list is rendered so callers get a fully-loaded page.
         WaitForElement(By.ClassName("inventory_list"));
-        return inventory;
+        return new InventoryPage(Driver);
     }
 
     public LoginPage LoginExpectingError(string username, string password)
@@ -31,7 +30,7 @@ public class LoginPage : BasePage
         WaitForElement(UsernameInput).SendKeys(username);
         Driver.FindElement(PasswordInput).Clear();
         Driver.FindElement(PasswordInput).SendKeys(password);
-        Driver.FindElement(LoginButton).Click();
+        JsClick(LoginButton);
         return this;
     }
 

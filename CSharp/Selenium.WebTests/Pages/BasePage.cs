@@ -23,6 +23,12 @@ public abstract class BasePage
     protected IWebElement WaitForClickable(By locator) =>
         Wait.Until(ExpectedConditions.ElementToBeClickable(locator));
 
+    // JS click is required in CI headless Chrome: some elements swallow Selenium's
+    // synthetic click events (animations, React event delegation, overlays).
+    protected void JsClick(By locator) =>
+        ((IJavaScriptExecutor)Driver).ExecuteScript(
+            "arguments[0].click();", WaitForClickable(locator));
+
     protected bool IsElementVisible(By locator)
     {
         try { return Driver.FindElement(locator).Displayed; }

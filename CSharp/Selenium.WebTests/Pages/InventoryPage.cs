@@ -64,7 +64,7 @@ public class InventoryPage : BasePage
 
     public CartPage GoToCart()
     {
-        WaitForElement(CartLink).Click();
+        JsClick(CartLink);
         Wait.Until(d => d.Url.Contains("cart"));
         return new CartPage(Driver);
     }

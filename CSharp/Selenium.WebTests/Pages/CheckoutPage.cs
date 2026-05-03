@@ -18,13 +18,15 @@ public class CheckoutPage : BasePage
         WaitForElement(FirstNameInput).SendKeys(firstName);
         Driver.FindElement(LastNameInput).SendKeys(lastName);
         Driver.FindElement(PostalCodeInput).SendKeys(postalCode);
-        Driver.FindElement(ContinueButton).Click();
+        JsClick(ContinueButton);
+        Wait.Until(d => d.Url.Contains("checkout-step-two"));
         return this;
     }
 
     public CheckoutPage FinishOrder()
     {
-        WaitForElement(FinishButton).Click();
+        JsClick(FinishButton);
+        Wait.Until(d => d.Url.Contains("checkout-complete"));
         return this;
     }
 
