@@ -65,7 +65,12 @@ public class InventoryPage : BasePage
     public LoginPage Logout()
     {
         WaitForElement(BurgerMenu).Click();
-        WaitForElement(LogoutLink).Click();
+        // SauceDemo's sidebar slides in via CSS animation; WaitForClickable isn't
+        // enough — the element is "clickable" before the transition fully settles.
+        // A JS click bypasses the animation overlay reliably.
+        var logoutLink = WaitForClickable(LogoutLink);
+        ((OpenQA.Selenium.IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].click();", logoutLink);
+        Wait.Until(d => d.Url == "https://www.saucedemo.com/");
         return new LoginPage(Driver);
     }
 }

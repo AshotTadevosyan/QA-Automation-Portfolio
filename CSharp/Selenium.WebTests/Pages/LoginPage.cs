@@ -19,7 +19,10 @@ public class LoginPage : BasePage
         WaitForElement(UsernameInput).SendKeys(username);
         Driver.FindElement(PasswordInput).SendKeys(password);
         Driver.FindElement(LoginButton).Click();
-        return new InventoryPage(Driver);
+        var inventory = new InventoryPage(Driver);
+        // Block until the inventory list is rendered so callers get a fully-loaded page.
+        WaitForElement(By.ClassName("inventory_list"));
+        return inventory;
     }
 
     public LoginPage LoginExpectingError(string username, string password)
