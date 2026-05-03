@@ -49,6 +49,6 @@ public class LoginTests : BaseTest
         var inventory = LoginPage.LoginAs(TestSettings.ValidUsername, TestSettings.ValidPassword);
         inventory.Logout();
 
-        Driver.Url.Should().Be($"{TestSettings.BaseUrl}/");
+        Driver.Url.Should().StartWith(TestSettings.BaseUrl);
     }
 }

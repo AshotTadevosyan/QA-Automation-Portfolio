@@ -18,8 +18,8 @@ public class LoginPage : BasePage
     {
         WaitForElement(UsernameInput).SendKeys(username);
         Driver.FindElement(PasswordInput).SendKeys(password);
-        JsClick(LoginButton);
-        // Block until the inventory list is rendered so callers get a fully-loaded page.
+        WaitForClickable(LoginButton).Click();
+        // Block until the inventory list renders so callers get a fully-loaded page.
         WaitForElement(By.ClassName("inventory_list"));
         return new InventoryPage(Driver);
     }
@@ -30,7 +30,7 @@ public class LoginPage : BasePage
         WaitForElement(UsernameInput).SendKeys(username);
         Driver.FindElement(PasswordInput).Clear();
         Driver.FindElement(PasswordInput).SendKeys(password);
-        JsClick(LoginButton);
+        WaitForClickable(LoginButton).Click();
         return this;
     }
 

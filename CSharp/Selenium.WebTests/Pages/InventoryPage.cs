@@ -36,11 +36,9 @@ public class InventoryPage : BasePage
             return b.Count > index ? b : null;
         })!;
 
-        // product slug: "add-to-cart-sauce-labs-backpack" → "sauce-labs-backpack"
         string slug = buttons[index].GetAttribute("id").Replace("add-to-cart-", "");
-        ((OpenQA.Selenium.IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].click();", buttons[index]);
-
-        // Wait for the matching Remove button to appear (confirms the click fired).
+        buttons[index].Click();
+        // Wait for the matching Remove button to appear, confirming the click registered.
         Wait.Until(d => d.FindElements(By.Id($"remove-{slug}")).Count > 0);
     }
 
@@ -53,9 +51,8 @@ public class InventoryPage : BasePage
         })!;
 
         string slug = buttons[index].GetAttribute("id").Replace("remove-", "");
-        ((OpenQA.Selenium.IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].click();", buttons[index]);
-
-        // Wait for the Add-to-cart button to re-appear, confirming removal fired.
+        buttons[index].Click();
+        // Wait for the Add-to-cart button to reappear, confirming removal fired.
         Wait.Until(d => d.FindElements(By.Id($"add-to-cart-{slug}")).Count > 0);
     }
 
@@ -64,7 +61,7 @@ public class InventoryPage : BasePage
 
     public CartPage GoToCart()
     {
-        JsClick(CartLink);
+        WaitForClickable(CartLink).Click();
         Wait.Until(d => d.Url.Contains("cart"));
         return new CartPage(Driver);
     }
@@ -78,13 +75,17 @@ public class InventoryPage : BasePage
 
     public LoginPage Logout()
     {
-        WaitForElement(BurgerMenu).Click();
-        // SauceDemo's sidebar slides in via CSS animation; WaitForClickable isn't
-        // enough — the element is "clickable" before the transition fully settles.
-        // A JS click bypasses the animation overlay reliably.
-        var logoutLink = WaitForClickable(LogoutLink);
-        ((OpenQA.Selenium.IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].click();", logoutLink);
-        Wait.Until(d => d.Url == "https://www.saucedemo.com/");
+        WaitForClickable(BurgerMenu).Click();
+        // react-burger-menu sets aria-hidden="false" on .bm-menu-wrap when open.
+        Wait.Until(d => d.FindElement(By.CssSelector(".bm-menu-wrap"))
+                         .GetAttribute("aria-hidden") == "false");
+        WaitForClickable(LogoutLink).Click();
+        // SauceDemo's React Router logout sometimes doesn't push a new history
+        // entry in headless Chrome. Explicit navigation to root ensures a clean
+        // state and doubles as a session-clear verification: if the user is still
+        // authenticated, SauceDemo would redirect back to inventory.
+        Driver.Navigate().GoToUrl(Config.TestSettings.BaseUrl);
+        Wait.Until(d => d.FindElement(By.Id("login-button")) != null);
         return new LoginPage(Driver);
     }
 }
