@@ -1,0 +1,104 @@
+name: QA Automation CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── C# xUnit Unit Tests ─────────────────────────────────────────────────────
+  unit-tests-csharp:
+    name: "C# xUnit Unit Tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore CSharp/xUnit.UnitTests/xUnit.UnitTests.csproj
+
+      - name: Build
+        run: dotnet build CSharp/xUnit.UnitTests/xUnit.UnitTests.csproj --no-restore
+
+      - name: Run unit tests
+        run: >
+          dotnet test CSharp/xUnit.UnitTests/xUnit.UnitTests.csproj
+          --no-build
+          --logger "trx;LogFileName=unit-test-results.trx"
+          --results-directory ./TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: ./TestResults/*.trx
+
+  # ── C# Selenium WebDriver Tests ─────────────────────────────────────────────
+  selenium-tests-csharp:
+    name: "C# Selenium Tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Install Chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Restore dependencies
+        run: dotnet restore CSharp/Selenium.WebTests/Selenium.WebTests.csproj
+
+      - name: Build
+        run: dotnet build CSharp/Selenium.WebTests/Selenium.WebTests.csproj --no-restore
+
+      - name: Run Selenium tests
+        run: >
+          dotnet test CSharp/Selenium.WebTests/Selenium.WebTests.csproj
+          --no-build
+          --logger "trx;LogFileName=selenium-test-results.trx"
+          --results-directory ./TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-test-results
+          path: ./TestResults/*.trx
+
+  # ── Java Playwright Tests ────────────────────────────────────────────────────
+  playwright-tests-java:
+    name: "Java Playwright Tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: maven
+
+      - name: Install Playwright browsers
+        working-directory: Java/playwright-tests
+        run: ./mvnw exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install --with-deps chromium" -q
+
+      - name: Run Playwright tests
+        working-directory: Java/playwright-tests
+        run: ./mvnw test -q
+
+      - name: Upload Surefire reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-surefire-reports
+          path: Java/playwright-tests/target/surefire-reports/

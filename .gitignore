@@ -1,0 +1,33 @@
+# ── macOS ──────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ── .NET / C# ──────────────────────────────────────
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# ── Java / Maven ───────────────────────────────────
+target/
+.mvn/repository/
+*.class
+*.jar
+!mvnw
+!mvnw.cmd
+
+# ── Playwright ─────────────────────────────────────
+playwright-report/
+test-results/
+
+# ── IDE ────────────────────────────────────────────
+.idea/
+*.iml
+.vscode/
+*.swp

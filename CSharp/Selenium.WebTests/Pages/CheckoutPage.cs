@@ -1,0 +1,34 @@
+using OpenQA.Selenium;
+
+namespace Selenium.WebTests.Pages;
+
+public class CheckoutPage : BasePage
+{
+    private static readonly By FirstNameInput = By.Id("first-name");
+    private static readonly By LastNameInput  = By.Id("last-name");
+    private static readonly By PostalCodeInput = By.Id("postal-code");
+    private static readonly By ContinueButton = By.Id("continue");
+    private static readonly By FinishButton   = By.Id("finish");
+    private static readonly By ConfirmHeader  = By.ClassName("complete-header");
+
+    public CheckoutPage(IWebDriver driver) : base(driver) { }
+
+    public CheckoutPage FillShippingInfo(string firstName, string lastName, string postalCode)
+    {
+        WaitForElement(FirstNameInput).SendKeys(firstName);
+        Driver.FindElement(LastNameInput).SendKeys(lastName);
+        Driver.FindElement(PostalCodeInput).SendKeys(postalCode);
+        Driver.FindElement(ContinueButton).Click();
+        return this;
+    }
+
+    public CheckoutPage FinishOrder()
+    {
+        WaitForElement(FinishButton).Click();
+        return this;
+    }
+
+    public bool IsOrderConfirmed =>
+        IsElementVisible(ConfirmHeader) &&
+        Driver.FindElement(ConfirmHeader).Text.Contains("Thank you");
+}
