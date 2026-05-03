@@ -8,5 +8,5 @@ public static class TestSettings
     public static string InvalidUsername => "invalid_user";
     public static string ValidPassword => "secret_sauce";
     public static string InvalidPassword => "wrong_password";
-    public static int DefaultTimeoutSeconds => 10;
+    public static int DefaultTimeoutSeconds => 20;
 }

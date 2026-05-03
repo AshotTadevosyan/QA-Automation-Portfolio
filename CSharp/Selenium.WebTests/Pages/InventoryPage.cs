@@ -34,7 +34,11 @@ public class InventoryPage : BasePage
             By.CssSelector(".inventory_item button[id^='add-to-cart']"));
         if (index >= addButtons.Count)
             throw new ArgumentOutOfRangeException(nameof(index));
+        int countBefore = addButtons.Count;
         addButtons[index].Click();
+        // Wait for the button to flip to "Remove", confirming the click registered.
+        Wait.Until(d => d.FindElements(
+            By.CssSelector(".inventory_item button[id^='add-to-cart']")).Count == countBefore - 1);
     }
 
     public void RemoveProductFromCartByIndex(int index = 0)
@@ -43,7 +47,11 @@ public class InventoryPage : BasePage
             By.CssSelector(".inventory_item button[id^='remove']"));
         if (index >= removeButtons.Count)
             throw new ArgumentOutOfRangeException(nameof(index));
+        int countBefore = removeButtons.Count;
         removeButtons[index].Click();
+        // Wait for the button to flip back to "Add to cart".
+        Wait.Until(d => d.FindElements(
+            By.CssSelector(".inventory_item button[id^='remove']")).Count == countBefore - 1);
     }
 
     public string GetProductNameByIndex(int index = 0) =>
