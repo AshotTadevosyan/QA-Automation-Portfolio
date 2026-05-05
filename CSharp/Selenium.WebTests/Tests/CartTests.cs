@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Selenium.WebTests.Config;
+using Selenium.WebTests.Pages;
 using Xunit;
 
 namespace Selenium.WebTests.Tests;
@@ -7,49 +8,46 @@ namespace Selenium.WebTests.Tests;
 [Trait("Category", "Cart")]
 public class CartTests : BaseTest
 {
+    private readonly InventoryPage _inventory;
+
     public CartTests()
     {
-        LoginPage.LoginAs(TestSettings.ValidUsername, TestSettings.ValidPassword);
+        // LoginAs already waits for .inventory_list, but capture the page
+        // object it returns rather than discarding it and re-creating one.
+        _inventory = LoginPage.LoginAs(TestSettings.ValidUsername, TestSettings.ValidPassword);
     }
 
     [Fact]
     public void AddItem_ToCart_ShouldIncrementBadgeCount()
     {
-        var inventory = new Pages.InventoryPage(Driver);
-        inventory.AddProductToCartByIndex(0);
-
-        inventory.CartItemCount.Should().Be(1);
+        _inventory.AddProductToCartByIndex(0);
+        _inventory.CartItemCount.Should().Be(1);
     }
 
     [Fact]
     public void AddMultipleItems_ShouldReflectCorrectBadgeCount()
     {
-        var inventory = new Pages.InventoryPage(Driver);
-        inventory.AddProductToCartByIndex(0);
-        inventory.AddProductToCartByIndex(1);
-
-        inventory.CartItemCount.Should().Be(2);
+        _inventory.AddProductToCartByIndex(0);
+        _inventory.AddProductToCartByIndex(1);
+        _inventory.CartItemCount.Should().Be(2);
     }
 
     [Fact]
     public void RemoveItem_FromCart_ShouldDecrementBadgeCount()
     {
-        var inventory = new Pages.InventoryPage(Driver);
-        inventory.AddProductToCartByIndex(0);
-        inventory.AddProductToCartByIndex(1);
-        inventory.RemoveProductFromCartByIndex(0);
-
-        inventory.CartItemCount.Should().Be(1);
+        _inventory.AddProductToCartByIndex(0);
+        _inventory.AddProductToCartByIndex(1);
+        _inventory.RemoveProductFromCartByIndex(0);
+        _inventory.CartItemCount.Should().Be(1);
     }
 
     [Fact]
     public void GoToCart_ShouldShowAddedItems()
     {
-        var inventory = new Pages.InventoryPage(Driver);
-        var productName = inventory.GetProductNameByIndex(0);
-        inventory.AddProductToCartByIndex(0);
+        var productName = _inventory.GetProductNameByIndex(0);
+        _inventory.AddProductToCartByIndex(0);
 
-        var cart = inventory.GoToCart();
+        var cart = _inventory.GoToCart();
 
         cart.IsLoaded.Should().BeTrue();
         cart.ItemCount.Should().Be(1);
@@ -59,13 +57,12 @@ public class CartTests : BaseTest
     [Fact]
     public void CompleteCheckout_ShouldShowOrderConfirmation()
     {
-        var inventory = new Pages.InventoryPage(Driver);
-        inventory.AddProductToCartByIndex(0);
+        _inventory.AddProductToCartByIndex(0);
 
-        var checkout = inventory.GoToCart()
-                                .ProceedToCheckout()
-                                .FillShippingInfo("Jane", "Doe", "12345")
-                                .FinishOrder();
+        var checkout = _inventory.GoToCart()
+                                 .ProceedToCheckout()
+                                 .FillShippingInfo("Jane", "Doe", "12345")
+                                 .FinishOrder();
 
         checkout.IsOrderConfirmed.Should().BeTrue();
     }
